@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="ai_agent_planner" type="parking_moving_obstacles_node" name="parking_moving_obstacles_node" output="screen">
+   <rosparam file="$(find ai_agent_planner)/cfg/dynamicObs.yaml" command="load"/>
+  </node>
+</launch>

@@ -1,0 +1,33 @@
+vehicle_num: 4
+predictiontime: 30.0
+deltatime: 1.0
+car1: {
+  centerpx: -33.5759,
+  centerpy: 21.998,
+  desired_vel: 4.5,
+  radius: 12.0,
+  inityaw: 4.5
+7
+}
+car2: {
+  centerpx: -37.804,
+  centerpy: 7.38686,
+  desired_vel: 4.5,
+  radius: 12.0,
+  inityaw: 0.0
+}
+car3: {
+  centerpx: -37.804,
+  centerpy: 1.121,
+  desired_vel: 4.5,
+  radius: 12.0,
+  inityaw: -1.0
+
+}
+car4: {
+  centerpx: -37.804,
+  centerpy: -5.0256,
+  desired_vel: 4.5,
+  radius: 12.0,
+  inityaw: 4.7
+}

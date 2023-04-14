@@ -1,0 +1,3 @@
+<launch>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find phy_simulator)/rviz/phy_simulator_planning.rviz" required="true" />
+</launch>

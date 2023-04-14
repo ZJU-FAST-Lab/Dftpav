@@ -1,0 +1,30 @@
+<launch>
+  <arg name="arena_info_static_topic" value="/arena_info_static" />
+  <arg name="arena_info_dynamic_topic" value="/arena_info_dynamic" />
+  <arg name="ctrl_topic" value="/ctrl/agent_0" />
+
+  <arg name="playground" value = "ring_exp_v1.0" />
+  <!-- <param name="/use_sim_time" value="true"/> -->
+
+  <node pkg="planning_integrated" type="park" name="park_0" output="screen" >
+    <rosparam file="$(find ai_agent_planner)/cfg/dynamicObs.yaml" command="load"/>
+    <param name="ego_id" type="int" value="0" />
+    <param name="agent_config_path" type="string" value="$(find playgrounds)/$(arg playground)/agent_config.json" />
+    <param name="traj_config_path" type="string" value="$(find traj_planner)/config/minco_config.pb.txt" />
+    <param name="desired_vel" value="10.0"/>
+    <param name="use_sim_state" value="true"/>
+    <param name="enable_urban" value="true"/>
+    <param name="isparking" value="true"/>
+    <remap from="~arena_info_static" to="$(arg arena_info_static_topic)"/>
+    <remap from="~arena_info_dynamic" to="$(arg arena_info_dynamic_topic)"/>
+    <remap from="~ctrl" to="$(arg ctrl_topic)"/>
+    
+  </node>
+
+
+
+
+  
+
+
+</launch>

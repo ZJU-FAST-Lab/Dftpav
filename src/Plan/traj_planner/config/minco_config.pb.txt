@@ -1,0 +1,110 @@
+name: "planning.minco.Config"
+version: ""
+status: "SET"
+
+planner_cfg {
+  velocity_singularity_eps: 0.01
+  low_speed_threshold: 2.0
+  weight_proximity: 1.0
+  is_fitting_only: false
+}
+
+
+map_cfg {
+  map_size_x: 1000
+  map_size_y: 1000
+  map_size_z: 3
+
+
+  s_back_len: 20.0
+
+  dyn_bounds {
+    max_lon_vel: 50.0
+    min_lon_vel: 0.0
+    max_lon_acc: 3.0
+    max_lon_dec: -6.0
+    max_lat_vel: 2.5
+    max_lat_acc: 1.25
+  }
+
+  max_grids_along_time: 2
+
+  infl_steps {
+    x_p: 5
+    x_n: 5
+    y_p: 5
+    y_n: 5
+    z_p: 1
+    z_n: 1
+  }
+
+  max_tau: 0.8
+  init_max_tau: 0.8
+  w_time: 5
+  horizon: 50
+  resolution_dp: 0.5
+  time_resolution: 0.2
+  lambda_heu: 5.0
+  allocate_num: 100000
+  check_num: 5
+  max_search_time: 1.0
+  phi_grid_resolution: 0.3
+  traj_forward_penalty: 1.0
+  traj_back_penalty: 2.5
+  traj_gear_switch_penalty: 15.0
+  traj_steer_penalty: 0.5
+  traj_steer_change_penalty: 0.0
+  map_resl: 0.3
+  step_arc: 0.9
+  checkl: 0.2
+  onedv_res: 0.2
+  onedl_res: 0.1
+  onedt_res: 0.1
+}
+
+opt_cfg {
+  traj_resolution: 16
+  des_traj_resolution: 16
+  wei_sta_obs: 5000.0
+  wei_dyn_obs: 20000.0
+  wei_feas: 500.0
+  wei_sqrvar: 500.0
+  wei_time: 500.0
+  dyn_obs_clearance: 0.4
+  half_margin: 0.15
+
+  traj_piece_duration: 1.5
+  max_frontend_forward_vel: 5.0
+  max_frontend_forward_acc: 8.0
+  max_frontend_backward_vel: 2.0
+  max_frontend_backward_acc: 4.0
+  max_frontend_cur: 1.0
+  
+  max_forward_vel: 5.0
+  max_forward_acc: 8.0
+  max_forward_cur: 1.0
+
+  max_backward_vel: 2.0
+  max_backward_acc: 4.0
+  max_backward_cur: 1.0
+
+  max_latacc: 5.0
+  max_phidot: 10000.0
+
+
+  max_nonsv: 0.2
+  gearopt: true
+  lbfgs_memsize: 256
+  lbfgs_past: 3
+  lbfgs_delta: 0.0001
+  mini_t: 0.1
+}
+
+
+
+
+
+
+
+
+

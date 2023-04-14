@@ -1,0 +1,109 @@
+syntax = "proto2";
+
+package planning.minco;
+
+message TrajPlannerCfg {
+  required double velocity_singularity_eps = 1;
+  required double low_speed_threshold = 2;
+  required double weight_proximity = 3;
+  required bool is_fitting_only = 4;
+}
+
+message InflateSteps {
+  required int32 x_p = 1;
+  required int32 x_n = 2;
+  required int32 y_p = 3;
+  required int32 y_n = 4;
+  required int32 z_p = 5;
+  required int32 z_n = 6;
+}
+
+message DynamicBounds {
+  required double max_lon_vel = 1;
+  required double min_lon_vel = 2;
+  required double max_lon_acc = 3;
+  required double max_lon_dec = 4;
+  required double max_lat_vel = 5;
+  required double max_lat_acc = 6;
+}
+
+message TrajMapCfg {
+  required int32 map_size_x = 1;
+  required int32 map_size_y = 2;
+  required int32 map_size_z = 3;
+
+  required double map_resl = 4;
+
+  required double s_back_len = 5;
+  required DynamicBounds dyn_bounds = 6;
+
+  required int32 max_grids_along_time = 7;
+  required InflateSteps infl_steps = 8;
+
+  required double max_tau = 9;
+  required double init_max_tau = 10;
+  required double w_time = 11;
+  required double horizon = 12;
+  required double resolution_dp = 13;
+  required double time_resolution = 14;
+  required double lambda_heu = 15;
+  required int32 allocate_num = 16;
+  required int32 check_num = 17;
+  required double max_search_time = 18;
+  required double phi_grid_resolution = 19;
+  required double traj_forward_penalty = 20;
+  required double traj_back_penalty = 21;
+  required double traj_gear_switch_penalty = 22;
+  required double traj_steer_penalty = 23;
+  required double traj_steer_change_penalty = 24;
+  required double step_arc = 25;
+  required double checkl = 26;
+  required double onedv_res = 27;
+  required double onedl_res = 28;
+  required double onedt_res = 29;
+
+}
+
+message OptCfg {
+  required int32  traj_resolution = 1;
+  required double wei_sta_obs = 2;
+  required double wei_dyn_obs = 3;
+  required double wei_feas = 4;
+  required double wei_sqrvar = 5;           
+  required double wei_time = 6;
+  required double dyn_obs_clearance = 7;
+  required double max_forward_acc = 10;
+  required double max_backward_acc = 11;
+  required double max_frontend_cur = 12;
+  required double traj_piece_duration = 13;
+  required double half_margin = 16;
+  required int32 des_traj_resolution = 17;
+  required double max_phidot = 18;
+  required double max_forward_vel = 19;
+  required double max_backward_vel = 20;
+  required double max_forward_cur = 21;
+  required double max_backward_cur = 22;
+  required double max_latacc = 23;
+  required double max_nonsv = 24;
+  required bool gearopt = 25;
+  required int32  lbfgs_memsize = 26;
+  required int32  lbfgs_past = 27;
+  required double lbfgs_delta = 28;
+  required double mini_t = 29;
+  
+  required double max_frontend_forward_vel = 30;
+  required double max_frontend_forward_acc = 31;
+  required double max_frontend_backward_vel = 32;
+  required double max_frontend_backward_acc = 33;
+
+}
+
+
+message Config {
+  required string name = 1;
+  required string version = 2;
+  required string status = 3;
+  required TrajPlannerCfg planner_cfg = 4;
+  required TrajMapCfg map_cfg = 5;
+  required OptCfg opt_cfg = 6;
+}
