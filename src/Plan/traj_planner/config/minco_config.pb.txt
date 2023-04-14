@@ -64,7 +64,7 @@ map_cfg {
 
 opt_cfg {
   traj_resolution: 16
-  des_traj_resolution: 16
+  des_traj_resolution: 32
   wei_sta_obs: 5000.0
   wei_dyn_obs: 20000.0
   wei_feas: 500.0
@@ -92,7 +92,7 @@ opt_cfg {
   max_phidot: 10000.0
 
 
-  max_nonsv: 0.2
+  max_nonsv: 0.25
   gearopt: true
   lbfgs_memsize: 256
   lbfgs_past: 3
