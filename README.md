@@ -8,10 +8,8 @@ A lightweight **Spatial-Temporal** trajectory planner for car-like robots。
 Please cite the paper below if this repo helps you.
 
 - [An Efficient Spatial-Temporal Trajectory Planner for Autonomous Vehicles in Unstructured Environments](https://arxiv.org/abs/2208.13160), Zhichao Han, Yuwei Wu, Tong Li, Lu Zhang, Liuao Pei, Long Xu, Chengyang Li, Changjia Ma, Chao Xu, Shaojie Shen, Fei Gao.
-<p align="center">
-  ![](figs/1.gif)
-</p>
 
+![](figs/1.gif)
 ![](figs/2.gif)
 ![](figs/3.gif)
 
