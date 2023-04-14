@@ -10,12 +10,15 @@ Please cite the paper below if this repo helps you.
 - [An Efficient Spatial-Temporal Trajectory Planner for Autonomous Vehicles in Unstructured Environments](https://arxiv.org/abs/2208.13160), Zhichao Han, Yuwei Wu, Tong Li, Lu Zhang, Liuao Pei, Long Xu, Chengyang Li, Changjia Ma, Chao Xu, Shaojie Shen, Fei Gao.
 
 <p align="center">
-  <img src="figs/1.gif" width = "600"/>
+  <img src="figs/1.gif" width = "800"/>
+</p>
+<p align="center">
+  <img src="figs/2.gif" width = "800"/>
+</p>
+<p align="center">
+  <img src="figs/3.gif" width = "800"/>
 </p>
 
-![](figs/1.gif)
-![](figs/2.gif)
-![](figs/3.gif)
 
 
 ## 1. Setup
@@ -67,7 +70,9 @@ Then, you can use the **2D Nav Goal** in **RVIZ** to trigger the planning.
 
 Here is an example:
 
-![](figs/4.gif)
+<p align="center">
+  <img src="figs/4.gif" width = "800"/>
+</p>
 
 ## 4. Licence
 The source code is released under [GPLv3](http://www.gnu.org/licenses/) license.
