@@ -1732,7 +1732,6 @@ double PolyTrajOptimizer::debugGradCheck(const int i_dp, // index of constraint 
     max_forward_acc = cfg_.opt_cfg().max_forward_acc();
     max_backward_acc = cfg_.opt_cfg().max_backward_acc();
     max_latacc_ = cfg_.opt_cfg().max_latacc();
-    non_sinv = cfg_.opt_cfg().max_nonsv();
     GearOpt = cfg_.opt_cfg().gearopt();
     memsize = cfg_.opt_cfg().lbfgs_memsize();
     past = cfg_.opt_cfg().lbfgs_past();

@@ -386,7 +386,6 @@ namespace path_searching
     traj_steer_change_penalty = cfg_.map_cfg().traj_steer_change_penalty();
     step_arc = cfg_.map_cfg().step_arc();
     checkl = cfg_.map_cfg().checkl();
-    non_siguav = cfg_.opt_cfg().max_nonsv();
     
     
 

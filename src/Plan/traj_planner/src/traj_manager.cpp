@@ -627,18 +627,20 @@ namespace plan_manage
         }
 
         //debug
-        double max_acc = -1, max_lat  = -1;
+        double max_acc = -1, max_lat  = -1, max_cur = -1;
         for(unsigned int i = 0; i < kino_trajs_.size(); i++){
           plan_utils::Trajectory  traj = traj_container_.singul_traj[i].traj;
           for(double rest = 0.0; rest <= traj.getTotalDuration(); rest += 0.01){
             double lonacc = std::fabs(traj.getAcc(rest));
             double latacc = std::fabs(traj.getLatAcc(rest));
+            double cur =  std::fabs(traj.getCurv(rest));
             max_acc = max(max_acc,lonacc);
             max_lat = max(max_lat,latacc);
+            max_cur = max(max_cur, cur);
           }
           std::cout <<"trajid: "<<i<<" duration: "<< traj.getTotalDuration()<<std::endl;
         }
-        ROS_INFO_STREAM("max lon acc: " << max_acc <<" max lat acc: "<<max_lat);
+        ROS_INFO_STREAM("max lon acc: " << max_acc <<" max lat acc: "<<max_lat << "max cur: "<<max_cur);
     }
     else{
         ROS_ERROR("[PolyTrajManager] Planning fails! ");

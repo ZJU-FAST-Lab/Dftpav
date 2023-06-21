@@ -204,7 +204,7 @@ using namespace std;
 
     map_utils::TrajPlannerMapItf* frontend_map_itf_;
     common::VehicleParam vp_;
-    double non_siguav;
+    double non_siguav=0.2;
     ompl::base::StateSpacePtr shotptr;
 
     inline int getSingularity(double vel)

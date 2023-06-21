@@ -65,7 +65,7 @@ namespace plan_manage
     /*new added param*/
     double max_forward_vel, max_backward_vel, max_forward_cur, max_backward_cur;
     double max_forward_acc, max_backward_acc, max_phidot_, max_latacc_;       // dynamic limits
-    double non_sinv = 0.1;
+    double non_sinv = 0.24;
     bool GearOpt = true;
     /*lbfgs param*/
     int memsize;
