@@ -179,18 +179,15 @@ namespace plan_manage
     {
       flag_force_return = false;
       flag_success = true;
-      printf("\033[32miter=%d,time(ms)=%5.3f,total_t(ms)=%5.3f,cost=%5.3f\n\033[0m", iter_num_, time_ms, total_time_ms, final_cost);
 
     } 
     else if (result == lbfgs::LBFGSERR_MAXIMUMLINESEARCH){
-      printf("\033[32miter=%d,time(ms)=%5.3f,total_t(ms)=%5.3f,cost=%5.3f\n\033[0m", iter_num_, time_ms, total_time_ms, final_cost);
       // ROS_WARN("Lbfgs: The line-search routine reaches the maximum number of evaluations.");
       flag_force_return = false;
       flag_success = true;
     }
     else
     {
-      printf("\033[31m[PolyTrajOptimizer]iter=%d,time(ms)=%5.3f, error.\n\033[0m", iter_num_, time_ms);
       ROS_WARN("Solver error. Return = %d, %s. Skip this planning.", result, lbfgs::lbfgs_strerror(result));
     }
 

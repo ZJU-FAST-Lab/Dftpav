@@ -84,7 +84,6 @@ namespace plan_manage
     std::cout<<"init ctrl: "<<init_ctrl.transpose()<<std::endl;
     int status = kino_path_finder_->search(start_state, init_ctrl, end_state, true);
     double searcht2 = ros::Time::now().toSec();
-    std::cout<<"search time: "<<(searcht2-searcht1)<<std::endl;
     if (status == path_searching::KinoAstar::NO_PATH)
     {
       std::cout << "[kino replan]: kinodynamic search fail!" << std::endl;
@@ -206,7 +205,6 @@ namespace plan_manage
       return kWrongStatus;   
     }
     double frontendt2 = ros::Time::now().toSec();
-    ROS_INFO_STREAM("front_end time is: "<<1000.0*(frontendt2-frontendt1)<<" ms");
     // ros::Duration(1000.0).sleep();
 
     // tri_flag =1;
