@@ -546,16 +546,12 @@ namespace path_searching
     globalMap_pcd.header.stamp = ros::Time::now();
     globalMap_pcd.header.frame_id = "map";
     expandNodesVis.publish(globalMap_pcd);
-
-
-
     return;
   }
   void KinoAstar::getKinoNode(plan_utils::KinoTrajData &flat_trajs)
   {
     double truncate_len = 25.0;
     bool exceed_len = false;
-
     flat_trajs.clear();
     std::vector<Eigen::Vector3d> roughSampleList;
     double startvel = fabs(start_state_[3]);
@@ -565,6 +561,7 @@ namespace path_searching
     std::vector<double> thetas;
     Eigen::Vector4d x0, xt;
     Vector2d ut, u0;
+    // 搜索的结果[steer, v]经过trans后得到x，y，heading，其中steer进行插值，得到的是std::vector<Eigen::Vector3d>
     while(node->parent != NULL){
       for (int k = check_num_; k >0; k--)
       {
@@ -578,20 +575,24 @@ namespace path_searching
       }
       node = node->parent;
     } 
+    // 因为是倒着向前查找，因此最后一个元素是起点位置
     start_state_[2] = normalize_angle(start_state_[2]);
     roughSampleList.push_back(start_state_.head(3));
+    // 反转，使第一个元素是开头的点
     reverse(roughSampleList.begin(),roughSampleList.end());
-
+    // 如果从起点到终点没有碰撞的处理方式
+    // 这里像是将规划的最后一个点和end点插值
+    // 在搜索的时候会计算当前探索点是否可以直接和终点连接，如果可以的话，就把当前点作为搜索的最后一个
     if(is_shot_succ_){
       ompl::base::ScopedState<> from(shotptr), to(shotptr), s(shotptr);
-      Eigen::Vector3d state1,state2;
+      Eigen::Vector3d state1, state2;
       state1 = roughSampleList.back();
       state2 = end_state_.head(3);
       from[0] = state1[0]; from[1] = state1[1]; from[2] = state1[2];
       to[0] = state2[0]; to[1] = state2[1]; to[2] = state2[2];
       double shotLength = shotptr->distance(from(), to());
       std::vector<double> reals;
-      for(double l = checkl; l < shotLength; l += checkl){
+      for(double l = checkl; l < shotLength; l += checkl){ //checkl = 0.2
         shotptr->interpolate(from(), to(), l/shotLength, s());
         reals = s.reals();
         roughSampleList.push_back(Eigen::Vector3d(reals[0], reals[1], normalize_angle(reals[2])));        
@@ -600,6 +601,7 @@ namespace path_searching
       roughSampleList.push_back(end_state_.head(3));
     }
     //truncate the init trajectory
+    // 这里没有进行截取
     double tmp_len = 0;
     int truncate_idx = 0;
     for(truncate_idx = 0;truncate_idx <roughSampleList.size()-1;truncate_idx++){  
@@ -611,15 +613,18 @@ namespace path_searching
     roughSampleList.assign(roughSampleList.begin(),roughSampleList.begin()+truncate_idx+1);
     SampleTraj = roughSampleList;
     /*divide the whole shot traj into different segments*/   
-    shot_lengthList.clear();
-    shot_timeList.clear();
-    shotindex.clear();
-    shot_SList.clear(); 
+    shot_lengthList.clear(); // 每段路径的总长度
+    shot_timeList.clear(); // 每段路径的时间
+    shotindex.clear(); //每段路径的开始索引
+    shot_SList.clear();  // 每段路径的档位
     double tmpl = 0;
     bool ifnewtraj = false;
+    // 计算第一个点和第二个点的向量，与第一个点的heading方向是否锐角还是钝角来判断是不是切换档位，这里计算的第一个点的档位
+    // 需要注意的是 ego的heading在倒车的时候是不会反向的，而坐标形成的向量会反向
     int lastS = (SampleTraj[1]-SampleTraj[0]).head(2).dot(Eigen::Vector2d(cos(SampleTraj[0][2]),sin(SampleTraj[0][2])))>=0?1:-1;
     //hzchzc attention please!!! max_v must = min_v  max_acc must = min_acc
     shotindex.push_back(0);
+    // 根据档位是否切换将原始的路径分为多段，并存储路径s，起始idx，路径时间，和档位信息
     for(int i = 0; i<SampleTraj.size()-1; i++){
       Eigen::Vector3d state1 = SampleTraj[i];
       Eigen::Vector3d state2 = SampleTraj[i+1];
@@ -632,21 +637,24 @@ namespace path_searching
         shot_SList.push_back(lastS);
         shot_lengthList.push_back(tmpl);
         if(lastS>0)
+          // 输入：路径总长度，路径中最大加速度和速度，路径的起点和终点速度，输出为这段路线的合理的时间
           shot_timeList.push_back(evaluateDuration(tmpl,max_forward_vel, max_forward_acc, non_siguav,non_siguav));
         else
           shot_timeList.push_back(evaluateDuration(tmpl,max_backward_vel, max_backward_acc, non_siguav,non_siguav));
-
         tmpl = (state2-state1).head(2).norm();
       }       
       lastS = curS;
     }
+    // 最后一段因为没有档位切换，因此需要手动添加
     shot_SList.push_back(lastS);
     shot_lengthList.push_back(tmpl);
     if(lastS>0)
       shot_timeList.push_back(evaluateDuration(tmpl,max_forward_vel, max_forward_acc, non_siguav,non_siguav));
     else
       shot_timeList.push_back(evaluateDuration(tmpl,max_backward_vel, max_backward_acc, non_siguav,non_siguav));
+    // shotindex比其他属性多了一个维度，将最后终点的索引也存进去了
     shotindex.push_back(SampleTraj.size()-1);
+    // 将起点和终点的速度设置为真实需要的值，中间的因为涉及档位切换，所以起始和终止都是0[为了防止奇异，设置为0.2]
     if(shot_timeList.size()>=2){
       if(shot_SList[0]>0)
         shot_timeList[0] = evaluateDuration(shot_lengthList[0],max_forward_vel,max_forward_acc, startvel,non_siguav);
@@ -657,26 +665,29 @@ namespace path_searching
       else
         shot_timeList[shot_timeList.size()-1] = evaluateDuration(shot_lengthList.back(),max_backward_vel,max_backward_acc,non_siguav,endvel);
     }
+    // 如果只有一端的话，就把这段的其实和终止速度都设置为真实需要的值
     else{
       if(shot_SList[0]>0)
         shot_timeList[0] = evaluateDuration(shot_lengthList[0],max_forward_vel,max_forward_acc, startvel,endvel);
-      else  
+      else
         shot_timeList[0] = evaluateDuration(shot_lengthList[0],max_backward_vel,max_backward_acc, startvel,endvel);
     }
+
     /*extract flat traj  
     the flat traj include the end point but not the first point*/
+    // 因为sampletime是从0.1开始的
     for(int i=0;i<shot_lengthList.size();i++){
       double initv = non_siguav,finv = non_siguav;
       Eigen::Vector2d Initctrlinput,Finctrlinput;
       Initctrlinput<<0,0;Finctrlinput<<0,0;
       if(i==0) {initv  = startvel; Initctrlinput = start_ctrl;}
       if(i==shot_lengthList.size() - 1) finv = endvel;
-
       double locallength = shot_lengthList[i];
       int sig = shot_SList[i];
-      std::vector<Eigen::Vector3d> localTraj;localTraj.assign(SampleTraj.begin()+shotindex[i],SampleTraj.begin()+shotindex[i+1]+1);
+      std::vector<Eigen::Vector3d> localTraj;
+      localTraj.assign(SampleTraj.begin()+shotindex[i],SampleTraj.begin()+shotindex[i+1]+1);
       traj_pts.clear();
-      thetas.clear();        
+      thetas.clear();
       double samplet;
       double tmparc = 0;
       int index = 0;
@@ -684,6 +695,7 @@ namespace path_searching
       if(shot_timeList[i]<=sampletime){
         sampletime = shot_timeList[i] / 2.0;
       }
+      // 根据采样时间查找相应的路径点
       for(samplet = sampletime; samplet<shot_timeList[i]; samplet+=sampletime){
         double arc;
         if(sig > 0){
@@ -698,13 +710,18 @@ namespace path_searching
         {
           tmparc+= (localTraj[k+1]-localTraj[k]).head(2).norm();
           if(tmparc>=arc){
+            // 得到根据上面速度变化走到的length最近的点
+            // 第k+1个点才是第一个大于目标值的点
             index = k;
             double l1 = tmparc-arc;
             double l = (localTraj[k+1]-localTraj[k]).head(2).norm();
             double l2 = l-l1;//l2
+            // 这段主要完成插值
+            // l1/l为靠近第k+1个点的部分，l2/l为靠近k+1点应该占的比例；反之
             double px = (l1/l*localTraj[k]+l2/l*localTraj[k+1])[0];
             double py = (l1/l*localTraj[k]+l2/l*localTraj[k+1])[1];
             double yaw= (l1/l*localTraj[k]+l2/l*localTraj[k+1])[2];
+            // 归一化角度
             if(fabs(localTraj[k+1][2]-localTraj[k][2])>=M_PI){   
               double normalize_yaw;
               if(localTraj[k+1][2]<=0){
@@ -715,18 +732,22 @@ namespace path_searching
               }
               yaw = normalize_yaw;
             }
+            // 将这个点的x，y和对应的采样时间放入轨迹；将yaw放入航向角数组
             traj_pts.push_back(Eigen::Vector3d(px,py,sampletime));
             thetas.push_back(yaw);
+            // 因为idx的索引是k，而在k处还没有加上第k+1个点的距离
             tmparc -=(localTraj[k+1]-localTraj[k]).head(2).norm();
             break;
           }
-        }      
+        }
       }
+      //从for循环来看不包含最后一个时刻，因此需要单独加上
       traj_pts.push_back(Eigen::Vector3d(localTraj.back()[0],localTraj.back()[1],shot_timeList[i]-(samplet-sampletime)));
       thetas.push_back(localTraj.back()[2]);
       plan_utils::FlatTrajData flat_traj;
       Eigen::MatrixXd startS;
       Eigen::MatrixXd endS;
+      // 得到起点和平坦结构信息，pva
       getFlatState(Eigen::Vector4d(localTraj.front()[0],localTraj.front()[1],localTraj.front()[2],initv),Initctrlinput,startS,sig);
       getFlatState(Eigen::Vector4d(localTraj.back()[0],localTraj.back()[1],localTraj.back()[2],finv),Finctrlinput,endS,sig);
       flat_traj.traj_pts = traj_pts;
@@ -749,16 +770,17 @@ namespace path_searching
     double startv2 = pow(startV,2);
     double endv2 = pow(endV,2);
     double maxv2 = pow(max_vel,2);
+    // 根据2ax=v1^2-v0^2得到x
     critical_len = (maxv2-startv2)/(2*max_acc)+(maxv2-endv2)/(2*max_acc);
     if(length>=critical_len){
+      //时间为加速时间匀速时间和减速时间组成
       return (max_vel-startV)/max_acc+(max_vel-endV)/max_acc+(length-critical_len)/max_vel;
     }
     else{
+      // 起点和终点的动能加上加速段来的动能，得到最大速度tmpv
       double tmpv = sqrt(0.5*(startv2+endv2+2*max_acc*length));
       return (tmpv-startV)/max_acc + (tmpv-endV)/max_acc;
     }
-
-
   }
   double KinoAstar::evaluateLength(double curt,double locallength,double localtime,double max_vel, double max_acc, double startV, double endV){
     double critical_len; //the critical length of two-order optimal control, acc is the input
@@ -769,6 +791,8 @@ namespace path_searching
     double endv2 = pow(endV,2);
     double maxv2 = pow(max_vel,2);
     critical_len = (maxv2-startv2)/(2*max_acc)+(maxv2-endv2)/(2*max_acc);
+    // 当存在以最大速度匀速行驶的情况时，分别计算每段的时间，根据当前的时间判断处于那个阶段，并计算相应的按照这种方式应该到达的length
+    // 按理说在预处理已经做好了，肯定满足，可能是其他函数中没有预处理
     if(locallength>=critical_len){
       double t1 = (max_vel-startV)/max_acc;
       double t2 = t1+(locallength-critical_len)/max_vel;
@@ -782,6 +806,7 @@ namespace path_searching
         return startV*t1 + 0.5*max_acc*pow(t1,2) + (t2-t1)*max_vel + max_vel*(curt-t2)-0.5*max_acc*pow(curt-t2,2);
       }
     }
+    // 如果不满足，就计算一个最大速度，只有加速和减速过程，并根据当前t计算走过的length
     else{
       double tmpv = sqrt(0.5*(startv2+endv2+2*max_acc*locallength));
       double tmpt = (tmpv-startV)/max_acc;
@@ -830,13 +855,12 @@ namespace path_searching
 
   }
 
-
+  // state中的v是在自车坐标系下的纵向速度
+  // control是[纵向加速度，前轮转角]
   void KinoAstar::getFlatState(Eigen::Vector4d state, Eigen::Vector2d control_input,
                                   Eigen::MatrixXd &flat_state, int singul)
   {
-
     flat_state.resize(2, 3);
-
     double angle = state(2);
     double vel   = state(3); // vel > 0 
 
@@ -850,7 +874,9 @@ namespace path_searching
     else{
       vel = singul * vel;
     }
-    
+    // 世界坐标系下的坐标
+    // 将自车下纵，横向速度转到世界坐标系的值
+    // 自车坐标下的纵向加速度和前轮转角计算世界坐标系下的横纵向加速度，其中横向加速度为tan(\delta)v^2/L
     flat_state << state.head(2), init_R*Eigen::Vector2d(vel, 0.0), 
                   init_R*Eigen::Vector2d(control_input(1), std::tan(control_input(0)) / vp_.wheel_base() * std::pow(vel, 2));
 
